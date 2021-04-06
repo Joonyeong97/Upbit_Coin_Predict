@@ -1,8 +1,10 @@
 # Upbit_Coin_Predict
 업비트API를 이용한 코인시세 예측(python LSTM)
 
+# 필수 라이브러리 설치
 !pip install -r requirements
 
+# 내용
 소스코드의 변경은 코랩을 참고해주세요.
 
 소스코드의 수정은 자유입니다.
