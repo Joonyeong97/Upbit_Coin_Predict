@@ -1,5 +1,5 @@
 # Upbit_Coin_Predict
-업비트API를 이용한 LSTM예측
+업비트API를 이용한 코인시세 예측(python LSTM)
 
 !pip install -r requirements
 
@@ -11,6 +11,8 @@
 
 간편하게 사용시
 main.py를 이용하시면 됩니다.
+
+데이터를 불러와서 예측만 할뿐, 트레이딩 기능은 없습니다.
 
 colab:
 https://colab.research.google.com/drive/11Mim6SDG6h1Vhc3vhLa4FKjzV-9F6P-F?usp=sharing#scrollTo=wbBAKG2CTSvJ
