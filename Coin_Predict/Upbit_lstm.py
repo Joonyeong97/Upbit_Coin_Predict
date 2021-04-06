@@ -1,7 +1,7 @@
-
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 
 
 plt.rcParams['font.family'] = 'Malgun Gothic'
@@ -169,6 +169,9 @@ class My_Lstm:
 
         _last_future_series = self.backup_series[-self.window_size:]
 
+        self.pred_times = times[-self.window_size:]
+        self.pred_times = self.pred_times.to_list()
+
         self.future_ = future_
         futures = []
 
@@ -187,6 +190,10 @@ class My_Lstm:
 
                 futures.append(predict[0][0])
 
+                # 시간도 동일하게 추가 및 제거
+                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=10))  # 추후 변경예정
+                self.pred_times.pop(0)
+
                 _last_future_series = np.delete(_last_future_series, 0)
 
             futures = self.un_scale_data(futures)
@@ -204,19 +211,24 @@ class My_Lstm:
                 _last_future_series = np.append(_last_future_series, predict[0][0])
                 futures.append(predict[0][0])
 
+                # 시간도 동일하게 추가 및 제거
+                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=10))  # 추후 변경예정
+                self.pred_times.pop(0)
+
                 _last_future_series = np.delete(_last_future_series, 0)
 
         self.futures = futures
         self._last_future_series = _last_future_series
 
-    def plot_few_(self, ):
+        self.pred_times = pd.DatetimeIndex(self.pred_times)
+
+    def plot_few_(self, coinid):
         threshold = np.ones_like(self._last_future_series, dtype=bool)
         threshold[:-self.future_] = False
 
-        pred_x = self.times[-self.window_size:]
         pred_y = self._last_future_series
 
-        plt.plot(pred_x, pred_y, color='blue', label='Real')
-        plt.plot(pred_x[threshold], pred_y[threshold], color='red', label='Real')
-        plt.title('{}개의 예측결과'.format(self.future_))
+        plt.plot(self.pred_times, pred_y, color='blue', label='Real')
+        plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Real')
+        plt.title(f"{coinid}  {self.future_}개 예측결과")
         plt.show()

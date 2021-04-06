@@ -25,7 +25,7 @@ def predict_coin(coinid,h5_name='ZRX_winsize24_epoch100.h5',window_size=24):
 
     mylstm2.predict_last_few(5)
 
-    mylstm2.plot_few_()
+    mylstm2.plot_few_(coinid)
 
 if __name__ == '__main__':
     print('selete "train" or "predict" : ')
