@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
@@ -63,8 +64,9 @@ class My_Lstm:
             history = self.model.fit(dataset, epochs=epochs)
         return history
 
-    def train_data_load(self, dataframe, col='open', scale=True, train_mode=True, window_size=24, batch_size=16,
+    def train_data_load(self, dataframe, col='open', scale=True, train_mode=True,interval='minute10', window_size=24, batch_size=16,
                         shuffle_buffer=30000):
+        self.interval = interval
         self.scale = scale
 
         # Dataframe to series 하나의 컬럼만 가져와서 예측진행
@@ -169,7 +171,7 @@ class My_Lstm:
 
         _last_future_series = self.backup_series[-self.window_size:]
 
-        self.pred_times = times[-self.window_size:]
+        self.pred_times = self.times[-self.window_size:]
         self.pred_times = self.pred_times.to_list()
 
         self.future_ = future_
@@ -229,6 +231,7 @@ class My_Lstm:
         pred_y = self._last_future_series
 
         plt.plot(self.pred_times, pred_y, color='blue', label='Real')
-        plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Real')
-        plt.title(f"{coinid}  {self.future_}개 예측결과")
+        plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Predict')
+        plt.title(f"{coinid} {self.interval} {self.future_}개 예측결과")
+        plt.legend(loc='center left')
         plt.show()
