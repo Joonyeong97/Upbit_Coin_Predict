@@ -3,6 +3,9 @@ import pandas as pd
 import tensorflow as tf
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
+import os
+import main
+import time
 
 
 plt.rcParams['font.family'] = 'Malgun Gothic'
@@ -224,14 +227,33 @@ class My_Lstm:
 
         self.pred_times = pd.DatetimeIndex(self.pred_times)
 
-    def plot_few_(self, coinid):
+    def plot_few_(self, coinid, save=True):
+        date = time.strftime('%Y%m%d%H%M', time.localtime(time.time()))
+
         threshold = np.ones_like(self._last_future_series, dtype=bool)
         threshold[:-self.future_] = False
 
         pred_y = self._last_future_series
 
+        plt.figure(figsize=(8,6))
+
+        #plt.axis('off'), plt.xticks([]), plt.yticks([])
+        #plt.tight_layout()
+        #plt.subplots_adjust(left=0, bottom=0, right=1, top=1, hspace=0, wspace=0)
         plt.plot(self.pred_times, pred_y, color='blue', label='Real')
         plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Predict')
-        plt.title(f"{coinid} {self.interval} {self.future_}개 예측결과")
+        plt.title(f"{coinid} {self.interval} {self.future_}0분 예측결과")
         plt.legend(loc='center left')
+
+        if save:
+            save_path = os.path.join(main.save_img_path, coinid)
+            if os.path.isdir(save_path):
+                print(coinid + ' 그래프 저장 경로 확인 완료')
+            elif not os.path.isdir(save_path):
+                os.mkdir(save_path)
+            elif not os.path.isdir(main.save_img_path):
+                os.mkdir(main.save_img_path)
+
+            plt.savefig(save_path + f"/{coinid}_{date}.png", bbox_inces='tight', dpi=400, pad_inches=0)
+
         plt.show()

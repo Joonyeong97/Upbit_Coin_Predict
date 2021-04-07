@@ -1,4 +1,9 @@
 from Coin_Predict import Upbit_Data, Upbit_lstm
+import time
+import os
+
+img_path = 'save_img'
+save_img_path = os.path.join(os.getcwd(),img_path)
 
 def start_train(h5_name,coinid='ZRX',):
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
@@ -18,7 +23,7 @@ def start_train(h5_name,coinid='ZRX',):
 
 def predict_coin(coinid,h5_name='ZRX_winsize24_epoch100.h5',window_size=24):
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
-    times, data = my_upbit.load_ml_data(col='open', interval='minute10', rows=30000) # 10분봉 30000개 데이터수집
+    times, data = my_upbit.load_ml_data(col='open', interval='minute10', rows=200) # 10분봉 30000개 데이터수집
 
     mylstm2 = Upbit_lstm.My_Lstm()
 
@@ -31,19 +36,22 @@ def predict_coin(coinid,h5_name='ZRX_winsize24_epoch100.h5',window_size=24):
     mylstm2.plot_few_(coinid)
 
 if __name__ == '__main__':
-    print('selete "train" or "predict" : ')
-    result = str(input())
+    print('Selete "train":0 or "predict":1 ')
+    result = int(input())
 
     print('input Coin name : ')
     coinid = str(input())
 
-    if result == 'train':
+    if result == 0:
         print('input save to h5_name : ')
         h5_name = str(input())
 
         start_train(h5_name,coinid)
-    elif result == 'predict':
-        predict_coin(coinid)
+
+    elif result == 1:
+        while True:
+            predict_coin(coinid)
+            time.sleep(602)
     else:
         print('Done!')
 
