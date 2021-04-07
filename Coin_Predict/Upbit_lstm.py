@@ -46,11 +46,15 @@ class My_Lstm:
 
     def keras_layers_compile(self, loss='mae', optimizer='adam', metrics='mae'):
         self.model = tf.keras.Sequential([
-            tf.keras.layers.LSTM(128, input_shape=[None, 1], return_sequences=True),
-            tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256)),
+            tf.keras.layers.BatchNormalization(input_shape=[None, 1]),
+            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(128, return_sequences=True)),
+            tf.keras.layers.Dropout(0.2),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Flatten(),
-            tf.keras.layers.Dense(128),
+            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNGRU(128,return_sequences=True)),
+            tf.keras.layers.Dropout(0.2),
+            tf.keras.layers.GlobalAveragePooling1D(),
+            tf.keras.layers.Dense(64,'relu'),
+            tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(1)])
 
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
@@ -62,14 +66,12 @@ class My_Lstm:
 
     def fit_lstm(self, dataset, epochs=100, callbacks=None):
         if callbacks:
-            history = self.model.fit(dataset, epochs=epochs, callbacks=callbacks)
+            self.model.fit(dataset, epochs=epochs, callbacks=callbacks)
         else:
-            history = self.model.fit(dataset, epochs=epochs)
-        return history
+            self.model.fit(dataset, epochs=epochs)
 
-    def train_data_load(self, dataframe, col='open', scale=True, train_mode=True,interval='minute10', window_size=24, batch_size=16,
-                        shuffle_buffer=30000):
-        self.interval = interval
+    def train_data_load(self, dataframe, col='open', scale=True, train_mode=True, window_size=24, batch_size=16,
+                        shuffle_buffer=30000, interval='minute1'):
         self.scale = scale
 
         # Dataframe to series 하나의 컬럼만 가져와서 예측진행
@@ -108,9 +110,7 @@ class My_Lstm:
         else:
 
             pass
-        history = self.fit_lstm(self.series, epochs=epochs, callbacks=callbacks)
-
-        return history
+        self.fit_lstm(self.series, epochs=epochs, callbacks=callbacks)
 
     def save_md(self, name):
         try:
@@ -170,7 +170,7 @@ class My_Lstm:
         plt.legend(loc='center left')
         plt.show()
 
-    def predict_last_few(self, future_):
+    def predict_last_few(self, future_,minutes=1):
 
         _last_future_series = self.backup_series[-self.window_size:]
 
@@ -196,7 +196,7 @@ class My_Lstm:
                 futures.append(predict[0][0])
 
                 # 시간도 동일하게 추가 및 제거
-                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=10))  # 추후 변경예정
+                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=minutes))  # 추후 변경예정
                 self.pred_times.pop(0)
 
                 _last_future_series = np.delete(_last_future_series, 0)
@@ -242,7 +242,7 @@ class My_Lstm:
         #plt.subplots_adjust(left=0, bottom=0, right=1, top=1, hspace=0, wspace=0)
         plt.plot(self.pred_times, pred_y, color='blue', label='Real')
         plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Predict')
-        plt.title(f"{coinid} {self.interval} {self.future_}0분 예측결과")
+        plt.title(f"{coinid} {self.interval} {self.future_}분 예측결과")
         plt.legend(loc='center left')
 
         if save:
