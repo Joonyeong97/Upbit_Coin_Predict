@@ -75,7 +75,7 @@ class My_Lstm:
             self.model.fit(dataset, epochs=epochs)
 
     def train_data_load(self, dataframe, col='open', scale=True, train_mode=True, window_size=24, batch_size=16,
-                        shuffle_buffer=30000, interval='minute1'):
+                        shuffle_buffer=30000, interval='minute10'):
         self.scale = scale
         self.interval = interval
 
@@ -183,7 +183,7 @@ class My_Lstm:
         self.pred_times = self.pred_times.to_list()
 
         self.future_ = future_
-        futures = []
+        predict_data = []
 
         if self.scale:
 
@@ -198,7 +198,7 @@ class My_Lstm:
 
                 _last_future_series = np.append(_last_future_series, predict[0][0])
 
-                futures.append(predict[0][0])
+                predict_data.append(predict[0][0])
 
                 # 시간도 동일하게 추가 및 제거
                 self.pred_times.append(self.pred_times[-1] + timedelta(minutes=minutes))  # 추후 변경예정
@@ -206,7 +206,7 @@ class My_Lstm:
 
                 _last_future_series = np.delete(_last_future_series, 0)
 
-            futures = self.un_scale_data(futures)
+            predict_data = self.un_scale_data(predict_data)
             _last_future_series = self.un_scale_data(_last_future_series)
 
         else:
@@ -219,7 +219,7 @@ class My_Lstm:
                 predict = self.model.predict(pred)
 
                 _last_future_series = np.append(_last_future_series, predict[0][0])
-                futures.append(predict[0][0])
+                predict_data.append(predict[0][0])
 
                 # 시간도 동일하게 추가 및 제거
                 self.pred_times.append(self.pred_times[-1] + timedelta(minutes=minutes))  # 추후 변경예정
@@ -227,7 +227,7 @@ class My_Lstm:
 
                 _last_future_series = np.delete(_last_future_series, 0)
 
-        self.futures = futures
+        self.predict_data = predict_data
         self._last_future_series = _last_future_series
 
         self.pred_times = pd.DatetimeIndex(self.pred_times)
