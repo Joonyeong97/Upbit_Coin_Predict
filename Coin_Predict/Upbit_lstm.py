@@ -46,12 +46,12 @@ class My_Lstm:
 
     def keras_layers_compile(self, loss='mae', optimizer='adam', metrics='mae'):
         self.model = tf.keras.Sequential([
-            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(64,input_shape=[None, 1], return_sequences=True,)),
+            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(128,input_shape=[None, 1], return_sequences=True,)),
             tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(128,return_sequences=True)),
+            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(64,return_sequences=True)),
             tf.keras.layers.BatchNormalization(),
             tf.keras.layers.GlobalAveragePooling1D(),
-            tf.keras.layers.Dense(64,kernel_regularizer='l2'),
+            tf.keras.layers.Dense(64),
             tf.keras.layers.LeakyReLU(),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(32),
@@ -59,13 +59,14 @@ class My_Lstm:
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(1)])
 
-
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
 
-    def callbacks(self, monitor='loss', mode='min', patience=10):
+    def callbacks(self, monitor='loss', mode='mse', patience=10):
         lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10 ** (epoch / 10))
-        earlystop = tf.keras.callbacks.EarlyStopping(monitor='loss', mode='mse', patience=10)
-        return [lr_schedule, earlystop]
+        earlystop = tf.keras.callbacks.EarlyStopping(monitor=monitor, mode=mode, patience=patience)
+        ModelCheckpoint = tf.keras.callbacks.ModelCheckpoint(self.h5_name, monitor=monitor, save_best_only=True)
+
+        return [lr_schedule, earlystop, ModelCheckpoint]
 
     def fit_lstm(self, dataset, epochs=100, callbacks=None):
         if callbacks:
@@ -174,7 +175,7 @@ class My_Lstm:
         plt.legend(loc='center left')
         plt.show()
 
-    def predict_last_few(self, future_,minutes=1):
+    def predict_last_few(self, future_,minutes=10):
 
         _last_future_series = self.backup_series[-self.window_size:]
 
@@ -221,7 +222,7 @@ class My_Lstm:
                 futures.append(predict[0][0])
 
                 # 시간도 동일하게 추가 및 제거
-                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=10))  # 추후 변경예정
+                self.pred_times.append(self.pred_times[-1] + timedelta(minutes=minutes))  # 추후 변경예정
                 self.pred_times.pop(0)
 
                 _last_future_series = np.delete(_last_future_series, 0)
@@ -241,9 +242,6 @@ class My_Lstm:
 
         plt.figure(figsize=(8,6))
 
-        #plt.axis('off'), plt.xticks([]), plt.yticks([])
-        #plt.tight_layout()
-        #plt.subplots_adjust(left=0, bottom=0, right=1, top=1, hspace=0, wspace=0)
         plt.plot(self.pred_times, pred_y, color='blue', label='Real')
         plt.plot(self.pred_times[threshold], pred_y[threshold], color='red', label='Predict')
         plt.title(f"{coinid} {self.interval} {self.future_}0분 예측결과")
@@ -258,6 +256,6 @@ class My_Lstm:
             elif not os.path.isdir(main.save_img_path):
                 os.mkdir(main.save_img_path)
 
-            plt.savefig(save_path + f"/{coinid}_{date}.png", bbox_inces='tight', dpi=400, pad_inches=0)
+            plt.savefig(save_path + f"/{coinid}_{date}.png", dpi=400, pad_inches=0)
 
         plt.show()
