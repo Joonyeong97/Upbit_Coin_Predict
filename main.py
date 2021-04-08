@@ -6,9 +6,11 @@ img_path = 'save_img'
 save_img_path = os.path.join(os.getcwd(),img_path)
 # 코인이름
 coinid = 'ZRX'
+
 # 분봉
 minutes = 10
 interval = 'minute10'
+
 # 예측할 갯수
 predict_count = 3
 
@@ -16,7 +18,14 @@ predict_count = 3
 window_size = 12
 
 # 가중치 파일이름
-h5_file_name = 'ZRX_winsize24_epoch100.h5'
+h5_file_name = 'ZRX_winsize12_epoch100_batch12_minute10_2625_349.h5'
+
+# 학습된 scale 값 입력
+max_scale = 2625
+min_scale = 349
+
+# 시작가,종료가 설정 open or close
+col = 'close'
 
 
 
@@ -36,9 +45,9 @@ def start_train(h5_name,coinid='ZRX',window_size=12):
     mylstm.predict_plot(pred1)
 
 
-def predict_coin(coinid,h5_file_name=h5_file_name,window_size=24,interval='minute1',predict_count=5,minutes=10):
+def predict_coin(coinid,h5_file_name,col='close',window_size=24,interval='minute10',predict_count=5,minutes=10):
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
-    times, data = my_upbit.load_ml_data(col='open', interval=interval, rows=200) # 10분봉 30000개 데이터수집
+    times, data = my_upbit.load_ml_data(col=col, interval=interval, rows=200) # 10분봉 30000개 데이터수집
 
     mylstm2 = Upbit_lstm.My_Lstm()
 
@@ -52,21 +61,29 @@ def predict_coin(coinid,h5_file_name=h5_file_name,window_size=24,interval='minut
 
 if __name__ == '__main__':
     print('Selete "train":0 or "predict":1 ')
-    result = int(input())
+    result = str(input())
 
     # print('input Coin name : ')
     # coinid = str(input())
 
-    if result == 0:
+    if result == '0':
         print('input save to h5_name : ')
         h5_name = str(input())
 
         start_train(h5_name,coinid)
 
-    elif result == 1:
+    elif result == '1':
         while True:
-            predict_coin(coinid,window_size=window_size,interval=interval,predict_count=predict_count,minutes=minutes)
+            predict_coin(coinid,col=col,h5_file_name=h5_file_name,window_size=window_size,interval=interval,predict_count=predict_count,minutes=minutes)
             time.sleep(601)
+
+    elif result == 'cuda':
+        import tensorflow as tf
+        from tensorflow.python.client import device_lib
+
+        print(tf.__version__)
+        print(device_lib.list_local_devices())
+
     else:
         print('Done!')
 
