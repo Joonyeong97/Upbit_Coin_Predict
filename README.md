@@ -31,6 +31,19 @@ main.py를 이용하시면 됩니다.
 데이터를 불러와서 예측만 할뿐, 트레이딩 기능은 없습니다.
 
 # Colab (학습 및 테스트 제공)
+단, 3개의 주소는 서로 독립적입니다.
+
 colab:
 
-https://colab.research.google.com/drive/11Mim6SDG6h1Vhc3vhLa4FKjzV-9F6P-F?usp=sharing#scrollTo=wbBAKG2CTSvJ
+Train and Test : 
+
+https://colab.research.google.com/drive/11951QOKax-p6FWMWFXL5LMBAa-J7rmR-?usp=sharing
+
+
+Train :
+
+https://colab.research.google.com/drive/1QPTHUVn5sGIT1IIuatmKq9oXPjIfhyrX#scrollTo=UbulCVlb2kU8
+
+Only Test:
+
+https://colab.research.google.com/drive/14MXrjwG5uz03N4d-QWZc633I17pDukQz#scrollTo=ZqGCu6OiMUVX
