@@ -33,4 +33,4 @@ main.py를 이용하시면 됩니다.
 # Colab (학습 및 테스트 제공)
 colab:
 
-https://colab.research.google.com/drive/11Mim6SDG6h1Vhc3vhLa4FKjzV-9F6P-F?usp=sharing#scrollTo=wbBAKG2CTSvJ
+https://colab.research.google.com/drive/11951QOKax-p6FWMWFXL5LMBAa-J7rmR-?usp=sharing
