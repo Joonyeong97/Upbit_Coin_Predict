@@ -25,7 +25,7 @@ class My_Upbit_Data():
 
         return df
 
-    def load_ml_data(self, col='open', interval='minute10', rows=20000):
+    def load_ml_data(self, interval='minute10', rows=20000):
         dataframe = self.__load_data(interval=interval, rows=rows)
         times = dataframe.index
 

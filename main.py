@@ -52,7 +52,7 @@ save_h5_name = 'train.h5'
 def start_train():
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
     mylstm = Upbit_lstm.My_Lstm()
-    times, data = my_upbit.load_ml_data(col=col, interval='minute10', rows=30000)
+    times, data = my_upbit.load_ml_data(interval='minute10', rows=30000)
 
     mylstm.train_data_load(data, scale=True, train_mode=True, window_size=window_size,batch_size=batch_size,shuffle_buffer=shuffle_buffer,interval=interval)
 
@@ -67,13 +67,13 @@ def start_train():
 
 def predict_coin():
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
-    times, data = my_upbit.load_ml_data(col=col, interval=interval, rows=200) # 10분봉 30000개 데이터수집
+    times, data = my_upbit.load_ml_data(interval=interval, rows=200) # 10분봉 30000개 데이터수집
 
     mylstm2 = Upbit_lstm.My_Lstm()
 
     mylstm2.model_load(h5_file_name, compile=False)
 
-    mylstm2.train_data_load(data, scale=True, train_mode=False,window_size=window_size,interval=interval)
+    mylstm2.train_data_load(data,col=col, scale=True, train_mode=False,window_size=window_size,interval=interval)
 
     mylstm2.predict_last_few(predict_count,minutes=minutes)
 

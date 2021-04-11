@@ -46,16 +46,12 @@ class My_Lstm:
 
     def keras_layers_compile(self, loss='mae', optimizer='adam', metrics='mae'):
         self.model = tf.keras.Sequential([
-            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(128,input_shape=[None, 1], return_sequences=True,)),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(64,return_sequences=True)),
-            tf.keras.layers.BatchNormalization(),
+            tf.compat.v1.keras.layers.CuDNNLSTM(64, input_shape=[None, 1], return_sequences=True,),
+            tf.keras.layers.Bidirectional(tf.compat.v1.keras.layers.CuDNNLSTM(128,return_sequences=True,)),
             tf.keras.layers.GlobalAveragePooling1D(),
-            tf.keras.layers.Dense(64),
-            tf.keras.layers.LeakyReLU(),
+            tf.keras.layers.Dense(256),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(32),
-            tf.keras.layers.LeakyReLU(),
             tf.keras.layers.Dropout(0.2),
             tf.keras.layers.Dense(1)])
 
