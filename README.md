@@ -33,4 +33,15 @@ main.py를 이용하시면 됩니다.
 # Colab (학습 및 테스트 제공)
 colab:
 
+Train and Test : 
+
 https://colab.research.google.com/drive/11951QOKax-p6FWMWFXL5LMBAa-J7rmR-?usp=sharing
+
+
+Train :
+
+https://colab.research.google.com/drive/1QPTHUVn5sGIT1IIuatmKq9oXPjIfhyrX#scrollTo=UbulCVlb2kU8
+
+Only Test:
+
+https://colab.research.google.com/drive/14MXrjwG5uz03N4d-QWZc633I17pDukQz#scrollTo=ZqGCu6OiMUVX
