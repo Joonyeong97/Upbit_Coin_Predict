@@ -11,6 +11,9 @@ import time
 plt.rcParams['font.family'] = 'Malgun Gothic'
 
 class My_Lstm:
+    def __init__(self,coinid):
+        self.coinid = coinid
+
     def windowed_dataset(self, series, window_size, batch_size, shuffle_buffer):
         series = tf.expand_dims(series, axis=-1)
         ds = tf.data.Dataset.from_tensor_slices(series)
@@ -57,23 +60,22 @@ class My_Lstm:
 
         self.model.compile(loss=loss, optimizer=optimizer, metrics=metrics)
 
-    def callbacks(self, monitor='loss', mode='mse', patience=10):
+    def callbacks(self,h5_name, monitor='loss', mode='mse', patience=10):
         lr_schedule = tf.keras.callbacks.LearningRateScheduler(lambda epoch: 1e-8 * 10 ** (epoch / 10))
         earlystop = tf.keras.callbacks.EarlyStopping(monitor=monitor, mode=mode, patience=patience)
-        ModelCheckpoint = tf.keras.callbacks.ModelCheckpoint(self.h5_name, monitor=monitor, save_best_only=True)
+        ModelCheckpoint = tf.keras.callbacks.ModelCheckpoint(h5_name, monitor=monitor, save_best_only=True)
 
         return [lr_schedule, earlystop, ModelCheckpoint]
 
-    def fit_lstm(self, dataset, epochs=100, callbacks=None):
-        if callbacks:
-            self.model.fit(dataset, epochs=epochs, callbacks=callbacks)
-        else:
-            self.model.fit(dataset, epochs=epochs)
-
     def train_data_load(self, dataframe, col='open', scale=True, train_mode=True, window_size=24, batch_size=16,
                         shuffle_buffer=30000, interval='minute10'):
-        self.scale = scale
+        # Tensorflow 전용 데이터셋으로 변환 (window size=예측할 날짜수)
+        self.window_size = window_size
+        self.batch_size = batch_size
         self.interval = interval
+
+        # Scale 여부
+        self.scale = scale
 
         # Dataframe to series 하나의 컬럼만 가져와서 예측진행
         series = self.__dataframe_to_series(dataframe, col=col)
@@ -92,9 +94,6 @@ class My_Lstm:
             if self.scale:
                 self.scale_data_fit(series)
 
-        # Tensorflow 전용 데이터셋으로 변환 (window size=예측할 날짜수)
-        self.window_size = window_size
-
         if train_mode:
             series = self.windowed_dataset(series, self.window_size, batch_size, shuffle_buffer)
 
@@ -102,16 +101,20 @@ class My_Lstm:
         else:
             self.series = series
 
-    def train_lstm(self, epochs=100, callbacks=None, loss='mae', optimizer='adam', metrics='mae'):
+    def train_lstm(self, epochs=100, callbacks=None, loss='mae', optimizer='adam', metrics='mae', ):
+
+        # 모델 체크포인트 이름
+        self.h5_name = f"{self.coinid}_win-{self.window_size}_epoch-{epochs}_batchsize-{self.batch_size}_interval-{self.interval}_max-{int(self.max_scale)}_min-{int(self.min_scale)}.h5"
+
+        print(self.h5_name)
 
         # Keras
         self.keras_layers_compile(loss=loss, optimizer=optimizer, metrics=metrics)
         if callbacks:
-            callbacks = self.callbacks()
+            callbacks = self.callbacks(h5_name=self.h5_name)
+            self.model.fit(self.series, epochs=epochs, callbacks=callbacks)
         else:
-
-            pass
-        self.fit_lstm(self.series, epochs=epochs, callbacks=callbacks)
+            self.model.fit(self.series, epochs=epochs)
 
     def save_md(self, name):
         try:

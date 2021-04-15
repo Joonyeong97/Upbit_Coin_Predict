@@ -24,17 +24,16 @@ h5_file_name = 'ZRX_winsize12_epoch100_batch12_minute10_2625_349.h5'
 max_scale = 2625
 min_scale = 349
 
+##### 학습에 사용되는 변수들 #####
+
 # 시작가,종료가 설정 open or close
 col = 'close'
 
-##### 학습에 사용되는 변수들 #####
-
-# 시작가 or 종료가
-col = 'close'
 # 분봉 단위 및 day단위
 interval = 'minute10'
+
 # API를 통해서 가져올 데이터의 수
-rows = 50000
+rows = 500
 
 # 훈련횟수
 epochs = 100
@@ -44,21 +43,17 @@ window_size = 12
 batch_size = 12
 # random(데이터의 수 보다 커야함)
 shuffle_buffer = 60000
-# 저장할 h5 이름
-save_h5_name = 'train.h5'
 
 
 
 def start_train():
     my_upbit = Upbit_Data.My_Upbit_Data(coinid=coinid)
-    mylstm = Upbit_lstm.My_Lstm()
-    times, data = my_upbit.load_ml_data(interval='minute10', rows=30000)
+    mylstm = Upbit_lstm.My_Lstm(coinid)
+    times, data = my_upbit.load_ml_data(interval='minute10', rows=rows)
 
-    mylstm.train_data_load(data, scale=True, train_mode=True, window_size=window_size,batch_size=batch_size,shuffle_buffer=shuffle_buffer,interval=interval)
+    mylstm.train_data_load(data, scale=True, train_mode=True,col=col, window_size=window_size,batch_size=batch_size,shuffle_buffer=shuffle_buffer,interval=interval)
 
     mylstm.train_lstm(loss='mse', metrics='mse', epochs=100, callbacks='go',)
-
-    mylstm.save_md(save_h5_name)
 
     pred1 = mylstm.predict(times, ranges=[-1500, -1])
 
@@ -87,9 +82,6 @@ if __name__ == '__main__':
     # coinid = str(input())
 
     if result == '0':
-        print('input save to h5_name : ')
-        h5_name = str(input())
-
         start_train()
 
     elif result == '1':
